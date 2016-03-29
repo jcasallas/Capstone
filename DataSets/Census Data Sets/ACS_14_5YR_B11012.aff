@@ -1,0 +1,9 @@
+<query schema-version="1.0" lang="en" type="table" sig="5Yxs27MTd2V0JkaBMBh32Th7ils">
+  <product program-id="ACS" dataset-id="14_5YR" table-id="B11012"/>
+  <selection>
+    <dimension type="geo" vintage="2014">
+      <cat-id>0400000US36.86000P</cat-id>
+    </dimension>
+  </selection>
+  <table is-transposed="true"/>
+</query>

@@ -1,0 +1,6 @@
+<query schema-version="1.0" lang="en" type="search" sig="QiwEn6_M_6AiiL9Pid-tr-Lf1_Y">
+  <search-config>
+    <topic-search dimension-name="d_housing_occupancy" dimension-value-name="Owner/Renter (Tenure in Occupied Units)"/>
+    <category-search type="geo" summary-level-code="860" name="All 5-Digit ZIP Code Tabulation Areas fully within/partially within New York"/>
+  </search-config>
+</query>
