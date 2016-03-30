@@ -237,14 +237,14 @@ perf4<- performance(pred4, "tpr", "fpr")
 
 plot.new()
 
-plot(perf,col="green", lwd =2.5)
+plot(perf,col="green", lwd =2.5, cex=0.5, cex.main=2, cex.label=1.5)
 plot(perf2, add= TRUE, col="black", lwd =2.5)
 plot(perf3, add= TRUE, col="blue", lwd =2.5)
 plot(perf4, add= TRUE, col="Yellow", lwd =2.5)
 abline(0,1, col="red",lwd=2.5, lty=2)
 
 title("ROC Curve")
-legend (0.8,0.4,c("Logistic","Multivariate","RF", "Naive Baynes"),
+legend (0.7,0.4,c("Logistic","Multivariate","RF", "Naive Baynes"),
         lty=c(1,1,1,1),
         lwd=c(1.4, 1.4,1.4,1.4), col=c("green","black", "blue", "yellow"))
 
@@ -258,3 +258,8 @@ fit.auc2
 fit.auc3
 fit.auc4
 
+#######################################################
+#Save model for later use
+######################################################
+## we idenify the Random Forest Model to be the best model to predict if a given customer would install Solar or not
+save(randomForestmodel, file ="SolarNYPredictionModel.rda")
