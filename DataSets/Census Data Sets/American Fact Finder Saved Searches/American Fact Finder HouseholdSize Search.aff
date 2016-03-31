@@ -1,0 +1,6 @@
+<query schema-version="1.0" lang="en" type="search" sig="2QaeVLdQL1tCyLejf0Kx14tJG2M">
+  <search-config>
+    <topic-search dimension-name="d_people_relationship" dimension-value-name="Household Size"/>
+    <category-search type="geo" summary-level-code="860" name="All 5-Digit ZIP Code Tabulation Areas fully within/partially within New York"/>
+  </search-config>
+</query>
