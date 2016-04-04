@@ -1,10 +1,47 @@
 
+library(C50)
+library(car)
+library(caret)
+library(corrplot)
+library(curl)
+library(e1071)
+library(ggplot2)
+library(partykit)
+library(pbkrtest)
+library(randomForest)
+library(RCurl)
+library(reshape2)
+library(ROCR)
+library(rgl)
+
+
 #####Loading Data########
 
 infile <- "CapstoneFileSolar_Final_20160329_V2"
 SolarFile <- read.csv(paste0('./', infile, '.csv'), header =TRUE)
 na.omit(SolarFile)
-Solar<- SolarFile
+Solar<- na.omit(SolarFile)
+
+plot (Solar$AverageIncome)
+plot (Solar$InstallationsPerZip)
+plot (Solar$Electric.Utility)
+plot (Solar$OwnerDetachedpercentage)
+
+
+hist (Solar$AverageIncome)
+hist (Solar$InstallationsPerZip)
+hist (Solar$OwnerDetachedpercentage)
+
+
+#Solar$AverageIncome<- as.character(Solar$AverageIncome)
+
+scatterplot(Solar$AverageIncome,Solar$InstallationsPerZip )
+scatterplot(Solar$AverageIncome,Solar$OwnerDetachedpercentage )
+scatterplot(Solar$OwnerDetachedpercentage,Solar$InstallationsPerZip)
+
+scatter3d(Solar$InstallationsPerZip ~Solar$AverageIncome+Solar$OwnerDetachedpercentage, id.n=50)
+
+Solar$AverageIncome<- as.numeric(Solar$AverageIncome)
 
 summary (Solar)
 str(Solar)
@@ -13,15 +50,9 @@ str(Solar)
 Solar$SolarInstalled<- as.character(Solar$SolarInstalled)
 Solar$Zip<- as.character(Solar$Zip)
 
-Solar$SolarInstalled[Solar$SolarInstalled=="Yes"]<- 1
-Solar$SolarInstalled[Solar$SolarInstalled=="No"]<- 0
-
-
-
-
 Solar$SolarInstalled<- as.numeric(Solar$SolarInstalled)
 
-
+summary (Solar)
 str(Solar)
 
 nums <- sapply(Solar, is.numeric)
@@ -54,8 +85,6 @@ res2 <- cor.mtest(Solar[,nums], 0.99)
 corrplot(M, p.mat = res1[[2]], sig.level = 0.2)
 
 
-InstallationsPerZip	Households	Pop	AverageIncome		Sola_Penetration		SolarInstalled	Average HH Size		Electric Utility	OwnerOccupancyPercentage	OwnerDetachedpercentage
-
 
 cor.test(Solar$SolarInstalled, Solar$AverageIncome, method = c("pearson"))
 cor.test(Solar$SolarInstalled, Solar$Sola_Penetration, method = c("pearson"))
@@ -85,6 +114,8 @@ str(Solar)
 mylogit_LRM <- glm (SolarInstalled~AverageIncome+Average.HH.Size+Households+OwnerOccupancyPercentage+OwnerDetachedpercentage, data=train_LRM, family ="binomial")
 summary (mylogit_LRM)
 
+#anova(mylogit_LRM, test_LRM="Chisq")
+
 # This will evaluate the models fit and performance
 
 influenceIndexPlot(mylogit_LRM, var=c("cook","hat"), id.n = 3)
@@ -110,8 +141,8 @@ exp(cbind(OR = coef(mylogit_LRM),confint(mylogit_LRM)))
 ############################################################
 
 Solar$SolarInstalled<- as.numeric(Solar$SolarInstalled)
-model_mlr <-lm(SolarInstalled~AverageIncome+Average.HH.Size+Households+OwnerOccupancyPercentage+OwnerDetachedpercentage, data=Solar)
-summary(model_mlr)
+#model_mlr <-lm(SolarInstalled~AverageIncome+Average.HH.Size+Households+OwnerOccupancyPercentage+OwnerDetachedpercentage, data=Solar)
+#summary(model_mlr)
 
 
 rn_train_MLR <-sample(nrow(Solar),floor(nrow(Solar)*0.75))
@@ -119,6 +150,7 @@ train_MLR <- Solar[rn_train_MLR,c(nums)]
 test_MLR <- Solar[,nums][-rn_train_MLR,]
 model_ulm_MLR <-lm(SolarInstalled~AverageIncome+Average.HH.Size+Households+OwnerOccupancyPercentage+OwnerDetachedpercentage, data=train_MLR)
 prediction_MLR <-predict(model_ulm_MLR, test_MLR)
+summary(model_ulm_MLR)
 
 ##############################################################
 #Model 3 Random Forest Model
@@ -134,9 +166,18 @@ randomForestmodel <- randomForest(SolarInstalled~AverageIncome+Average.HH.Size+H
 print(randomForestmodel)
 importance(randomForestmodel)
 
+plot(randomForestmodel)
+plot( importance(randomForestmodel), lty=2, pch=16)
+lines(importance(randomForestmodel))
+imp = importance(randomForestmodel)
+impvar = rownames(imp)[order(imp[, 1], decreasing=TRUE)]
+op = par(mfrow=c(1, 3))
+
+
+
 
 plot.new()
-
+plot(randomForestmodel)
 varImpPlot(randomForestmodel)
 
 varImpPlot(randomForestmodel, type=1, pch=19, col=2, cex=1.0, main="")
@@ -160,11 +201,12 @@ str(Solar)
 
 c50_tree_reslt<-C5.0(SolarInstalled~AverageIncome+Average.HH.Size+Households+OwnerOccupancyPercentage+OwnerDetachedpercentage,data=Solar, rules = TRUE)
 
+
+
 summary (c50_tree_reslt)
 
 C5imp(c50_tree_reslt, metric="usage")
 C5imp(c50_tree_reslt, metric="splits")
-
 
 
 
@@ -237,14 +279,15 @@ perf4<- performance(pred4, "tpr", "fpr")
 
 plot.new()
 
-plot(perf,col="green", lwd =2.5, cex=0.5, cex.main=2, cex.label=1.5)
-plot(perf2, add= TRUE, col="black", lwd =2.5)
-plot(perf3, add= TRUE, col="blue", lwd =2.5)
-plot(perf4, add= TRUE, col="Yellow", lwd =2.5)
+plot(perf,col="green", lwd =2.5, cex=0.5, cex.main=3, cex.label=1.5)
+plot(perf2, add= TRUE, col="black", lwd =2.5, cex=0.5, cex.main=3, cex.label=1.5)
+plot(perf3, add= TRUE, col="blue", lwd =2.5, cex=0.5, cex.main=3, cex.label=1.5)
+plot(perf4, add= TRUE, col="Yellow", lwd =2.5, cex=0.5, cex.main=3, cex.label=1.5)
 abline(0,1, col="red",lwd=2.5, lty=2)
 
 title("ROC Curve")
 legend (0.7,0.4,c("Logistic","Multivariate","RF", "Naive Baynes"),
+        
         lty=c(1,1,1,1),
         lwd=c(1.4, 1.4,1.4,1.4), col=c("green","black", "blue", "yellow"))
 
@@ -257,6 +300,13 @@ fit.auc1
 fit.auc2
 fit.auc3
 fit.auc4
+
+
+# Plot ROC curve with colors and threshold labels
+
+plot(perf3, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
+
+as.numeric(performance(perf3, "auc")@y.values)
 
 #######################################################
 #Save model for later use
